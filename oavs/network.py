@@ -8,6 +8,7 @@ import torch
 import numpy as np
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
+from functions import get_variable, get_numpy
 
 class Net(nn.Module):
     
@@ -219,17 +220,3 @@ class Net(nn.Module):
         #pdb.set_trace()
                 
         return I
-
-
-def get_variable(x):
-    """ Converts tensors to cuda, if available. """
-    if torch.cuda.is_available():
-        return x.cuda()
-    return x
-
-def get_numpy(x):
-    """ Get numpy array for both cuda and not. """
-    if torch.cuda.is_available():
-        return x.cpu().data.numpy()
-    return x.data.numpy()
-
