@@ -78,3 +78,18 @@ def psnr_1(img1, img2):
         return 100
     PIXEL_MAX = 1.0
     return 10 * math.log10(PIXEL_MAX / mse)
+
+def processLF(lf, lfsize, gamma_val):
+    
+    # Crop image
+    lf = lf[:3,:lfsize[0]*14,:lfsize[1]*14]
+    # 2D lenslet grid to 4D
+    lf = lf.view(3, lfsize[0], 14, lfsize[1], 14).permute(1, 3, 2, 4, 0)
+    # Pick the central perspectives only
+    lf = lf[:, :, (14//2)-(lfsize[2]//2):(14//2)+(lfsize[2]//2) + 1, (14//2)-(lfsize[3]//2):(14//2)+(lfsize[3]//2) + 1, :]
+    # Gamma correction
+    lf = torch.pow(lf, gamma_val)
+    # Normalize LF (-1 to 1)
+    lf = (lf * 2.0) - 1.0
+    
+    return lf

@@ -42,6 +42,10 @@ class Net(nn.Module):
             torch.tensor(self.grid_w, dtype=torch.float32), 
             torch.tensor(self.grid_h, dtype=torch.float32)),2).unsqueeze(0)
         
+        # For residual estimation
+        self.signR = np.array([1, -1, 1, -1])
+        self.signR = torch.from_numpy(self.signR[(None,)*4])
+        
         # Converting to cuda tensor if available
         if torch.cuda.is_available():
             self.P = self.P.cuda()
@@ -49,6 +53,7 @@ class Net(nn.Module):
             self.D = self.D.cuda()
             self.grid = self.grid.cuda()
             self.div = self.div.cuda()
+            self.signR = self.signR.cuda()
     
         # Making beta learnable parameter
         self.beta = torch.nn.Parameter(torch.tensor(1, dtype=torch.float32))
@@ -165,20 +170,20 @@ class Net(nn.Module):
         #pdb.set_trace()
             
         # Top-Left (-3, -3),
-        self.D[:,0,:,:,1] = p[:,None,None]*(self.lfsize[2] // 2) + 3
-        self.D[:,0,:,:,0] = q[:,None,None]*(self.lfsize[3] // 2) + 3
+        self.D[:,0,:,:,1] = p[:,None,None]*(self.lfsize[2] // 2) + self.lfsize[2] // 2
+        self.D[:,0,:,:,0] = q[:,None,None]*(self.lfsize[3] // 2) + self.lfsize[2] // 2
         
         # Top-right (-3, +3),
-        self.D[:,1,:,:,1] = p[:,None,None]*(self.lfsize[2] // 2) + 3
-        self.D[:,1,:,:,0] = q[:,None,None]*(self.lfsize[3] // 2) - 3
+        self.D[:,1,:,:,1] = p[:,None,None]*(self.lfsize[2] // 2) + self.lfsize[2] // 2
+        self.D[:,1,:,:,0] = q[:,None,None]*(self.lfsize[3] // 2) - self.lfsize[2] // 2
         
         # Bottom-Left (+3, -3),
-        self.D[:,2,:,:,1] = p[:,None,None]*(self.lfsize[2] // 2) - 3
-        self.D[:,2,:,:,0] = q[:,None,None]*(self.lfsize[3] // 2) + 3
+        self.D[:,2,:,:,1] = p[:,None,None]*(self.lfsize[2] // 2) - self.lfsize[2] // 2
+        self.D[:,2,:,:,0] = q[:,None,None]*(self.lfsize[3] // 2) + self.lfsize[2] // 2
         
         # Bottom-right (+3, +3),
-        self.D[:,3,:,:,1] = p[:,None,None]*(self.lfsize[2] // 2) - 3
-        self.D[:,3,:,:,0] = q[:,None,None]*(self.lfsize[3] // 2) - 3
+        self.D[:,3,:,:,1] = p[:,None,None]*(self.lfsize[2] // 2) - self.lfsize[2] // 2
+        self.D[:,3,:,:,0] = q[:,None,None]*(self.lfsize[3] // 2) - self.lfsize[2] // 2
         
         self.P[:,:,:,:] = p[:,None,None,None]
         self.Q[:,:,:,:] = q[:,None,None,None]
@@ -210,13 +215,14 @@ class Net(nn.Module):
         
         W = torch.cat((w_00[:,:,:,:,None], w_01[:,:,:,:,None], 
                        w_10[:,:,:,:,None], w_11[:,:,:,:,None]),4)
-        W = W.permute(0,4,2,3,1)
         
         M = self.scnn(torch.cat((w_00, w_01, w_10, w_11, d, self.P, self.Q), 1))
+        M = M.unsqueeze(4).permute(0, 4, 2, 3, 1)
         
-        
-        I = torch.sum(M.unsqueeze(4)*W, dim = 1).permute(0, 3, 1, 2)
+        I = torch.sum(M*W, dim = 4)
+                
+        R = torch.sum((I.unsqueeze(4)-W)*M*self.signR, dim = 4)
         
         #pdb.set_trace()
                 
-        return I
+        return I, R
