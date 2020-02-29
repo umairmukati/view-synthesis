@@ -7,9 +7,9 @@ from functions import get_variable
 
 class test():
     
-    def __init__(self):
+    def __init__(self, lfsize = [372, 540, 7, 7]):
         
-        self.lfsize         = [372, 540, 7, 7]
+        self.lfsize         = lfsize
         self.batch_affine   = True
 
     def createNet(self, network_file = 'network', model_file = 'model/model.pt'):
@@ -17,8 +17,6 @@ class test():
         network_module = import_module(network_file)
         reload(network_module)
         
-        pdb.set_trace()
-
         Net = network_module.Net
 
         self.net = Net((self.lfsize[0], self.lfsize[1]), 1, self.lfsize, batchAffine=self.batch_affine)
@@ -38,7 +36,7 @@ class test():
             print('No model.')
 
     def synthesizeView(self, corn, index):
-
+                
         p = np.ndarray([1])
         q = np.ndarray([1])
 
@@ -48,8 +46,8 @@ class test():
         corn = corn.permute(2,3,0,1).reshape(12,corn.shape[0],corn.shape[1])[None,:]
 
         with torch.no_grad():
-            Y, R = self.net(get_variable(corn), get_variable(torch.from_numpy(p)), get_variable(torch.from_numpy(q)))
+            Y, R, d = self.net(get_variable(corn), get_variable(torch.from_numpy(p)), get_variable(torch.from_numpy(q)))
 
-        return Y[0].permute(1,2,0), R[0].permute(1,2,0)
+        return Y[0].permute(1,2,0), R[0].permute(1,2,0), d[0]
 
 
