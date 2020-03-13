@@ -1,36 +1,35 @@
-import pdb
-
 import torch
-import h5py as h5
+#import h5py as h5
 import numpy as np
 import torch.nn.functional as F
+import math
 
-class MyDataset(torch.utils.data.Dataset):
-    def __init__(self, archive, lfsize, transform=None):
-        self.lfsize = lfsize
-        self.archive = h5.File(archive, 'r')
-        self.target = self.archive['GT']
-        self.data = self.archive['IN']
-        self.labels = self.archive['RP']
-                
-        self.transform = transform
-        
-    def __getitem__(self, index):
-        data = self.data[index]
-        target = self.target[index]
-        
-        labels = ((self.labels[index].astype('float')-1)-self.lfsize[2]//2)/(self.lfsize[2]//2)
-        if self.transform is not None:
-            data = self.transform(data)
-            target = self.transform(target)
-        
-        return data, target, labels
-    
-    def __len__(self):
-        return len(self.labels)
-    
-    def close(self):
-        self.archive.close()
+#class MyDataset(torch.utils.data.Dataset):
+#    def __init__(self, archive, lfsize, transform=None):
+#        self.lfsize = lfsize
+#        self.archive = h5.File(archive, 'r')
+#        self.target = self.archive['GT']
+#        self.data = self.archive['IN']
+#        self.labels = self.archive['RP']
+#                
+#        self.transform = transform
+#        
+#    def __getitem__(self, index):
+#        data = self.data[index]
+#        target = self.target[index]
+#        
+#        labels = ((self.labels[index].astype('float')-1)-self.lfsize[2]//2)/(self.lfsize[2]//2)
+#        if self.transform is not None:
+#            data = self.transform(data)
+#            target = self.transform(target)
+#        
+#        return data, target, labels
+#    
+#    def __len__(self):
+#        return len(self.labels)
+#    
+#    def close(self):
+#        self.archive.close()
 
 def customTransform(data, gamma_val = 0.4):
     return 2 * torch.pow(data.permute(1,0,2), gamma_val) - 1
@@ -70,7 +69,6 @@ def get_numpy(x):
         return x.cpu().data.numpy()
     return x.data.numpy()
 
-import math
 def psnr_1(img1, img2):
   
     mse = np.mean( ((img1 - img2)/2) ** 2 )
