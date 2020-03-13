@@ -225,4 +225,4 @@ class Net(nn.Module):
         
         #pdb.set_trace()
                 
-        return I, R
+        return I, R, d
