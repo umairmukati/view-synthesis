@@ -4,8 +4,9 @@ addpath('Functions');
 
 %InitParam();
 InitParamSrinivasan();
-
+tic
 PrepareTrainingData();
+toc
 
 %PrepareTestData();
 

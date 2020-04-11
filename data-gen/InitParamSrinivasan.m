@@ -46,12 +46,16 @@ param.gamma = 1;
 param.cropHeight = param.height - 2 * param.cropSizeTraining(1);
 param.cropWidth = param.width - 2 * param.cropSizeTraining(2);
 
-param.trainingScenes = 'C:\Users\mummu\Documents\Datasets\Srinivasan\Flowers_8bit\TestSet\';
-param.trainingData = 'C:\Users\mummu\Documents\Datasets\Srinivasan\Flowers_8bit\TestSet\Data\';
+%param.trainingScenes = 'C:\Users\mummu\Documents\Datasets\Srinivasan\Flowers_8bit\TestSet\';
+param.trainingScenes = 'C:\Users\mummu\Documents\Datasets\srinivasan\trainset';
+%param.trainingData = 'C:\Users\mummu\Documents\Datasets\Srinivasan\Flowers_8bit\TestSet\Data\';
+param.trainingData = 'C:\Users\mummu\Documents\Datasets\srinivasan\trainset\Data\';
 [~, param.trainingNames, ~] = GetFolderContent(param.trainingData, '.h5');
 
-param.testScenes = 'C:\Users\mummu\Documents\Datasets\Srinivasan\Flowers_8bit\TestSet\';
-param.testData = 'C:\Users\mummu\Documents\Datasets\Srinivasan\Flowers_8bit\TestSet\Data\';
+%param.testScenes = 'C:\Users\mummu\Documents\Datasets\Srinivasan\Flowers_8bit\TestSet\';
+param.testScenes = 'C:\Users\mummu\Documents\Datasets\srinivasan\testset';
+% param.testData = 'C:\Users\mummu\Documents\Datasets\Srinivasan\Flowers_8bit\TestSet\Data\';
+param.testData = 'C:\Users\mummu\Documents\Datasets\srinivasan\testset\Data\';
 [~, param.testNames, ~] = GetFolderContent(param.testData, '.h5');
 
 %param.trainNet = 'TrainingData';
